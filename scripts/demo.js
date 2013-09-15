@@ -53,8 +53,8 @@ $(function () {
         });
 
         // Initialize autocomplete with local lookup:
-        $('#autocomplete').autocomplete({
-            lookup: countriesArray,
+        $('#select-autocomplete').autocomplete({
+            /* lookup: countriesArray, */
             lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
                 var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'i');
                 return re.test(suggestion.value);
@@ -63,10 +63,10 @@ $(function () {
             minChars: 0,
             showSuggestionsOnFocus: true,
             onSelect: function (suggestion) {
-                $('#selection').html('You selected: ' + suggestion.value + ', ' + suggestion.data);
+                $('#select-selection').html('You selected: ' + suggestion.value + ', ' + suggestion.data);
             },
             onInvalidateSelection: function() {
-                $('#selction').html('You selected: none');
+                $('#select-selction').html('You selected: none');
             }
         });
         

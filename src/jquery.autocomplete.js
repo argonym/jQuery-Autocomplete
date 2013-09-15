@@ -139,6 +139,21 @@
                 options = that.options,
                 container;
 
+            if (that.el.is('select')) {
+                if (!$.isArray(options.lookup)) options.lookup = [];
+                that.el.children('option').each(function(i, option) {
+                    var option = $(option);
+                    var label = option.prop('label').length>0 ? option.prop('label') : option.val();
+                    var value = option.prop('value').length>0 ? option.prop('value') : option.val();
+                    options.lookup.push({ 'value': label, 'data': value });
+                });
+                var inputEl = $('<input type="text" name="'+that.el.attr('name')+'" id="'+that.el.attr('id')+'" class="'+that.el.attr('class')+'"/>');
+                // inputEl[0].mergeAttributes(that.element, true);
+                that.el.replaceWith(inputEl);
+                that.el = inputEl;
+                that.element = inputEl[0];
+            }
+
             // Remove autocomplete attribute to prevent native suggestions:
             that.element.setAttribute('autocomplete', 'off');
 
