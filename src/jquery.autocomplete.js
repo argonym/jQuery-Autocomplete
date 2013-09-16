@@ -102,6 +102,8 @@
         that.cachedResponse = [];
         that.onChangeInterval = null;
         that.onChange = null;
+        that.internalOnSelect = null;
+        that.internalOnInvalidateSelection = null;
         that.isLocal = false;
         that.suggestionsContainer = null;
         that.options = $.extend({}, defaults, options);
@@ -143,15 +145,29 @@
                 if (!$.isArray(options.lookup)) options.lookup = [];
                 that.el.children('option').each(function(i, option) {
                     var option = $(option);
-                    var label = option.prop('label').length>0 ? option.prop('label') : option.val();
-                    var value = option.prop('value').length>0 ? option.prop('value') : option.val();
-                    options.lookup.push({ 'value': label, 'data': value });
+                    var label = option.prop('label') || option.val(); // TODO: check various combinations of this
+                    var value = option.prop('value') || option.val();
+                    if (label||value) options.lookup.push({ 'value': label||value, 'data': value }); // TODO: check what happens if there is no empty option
                 });
-                var inputEl = $('<input type="text" name="'+that.el.attr('name')+'" id="'+that.el.attr('id')+'" class="'+that.el.attr('class')+'"/>');
-                // inputEl[0].mergeAttributes(that.element, true);
-                that.el.replaceWith(inputEl);
+                var inputEl = $('<input type="text" id="'+that.el.attr('id')+'-autocomplete" class="'+that.el.attr('class')+'" style="'+that.el.attr('style')+'"/>');
+                // TODO: copy more attributes, adhere to option[selected]
+                that.el.hide();
+                that.el.before(inputEl);
+                var originalEl = that.el;
                 that.el = inputEl;
                 that.element = inputEl[0];
+
+                that.internalOnSelect = function(suggestion) {
+                    var originalOption = originalEl.children('option[value="'+(suggestion.data||suggestion.value)+'"]')
+                                         || originalEl.children('option:contains("'+(suggestion.data||suggestion.value)+'")');
+                    originalOption.prop('selected', true); // TODO: select multi (?)
+                    originalEl.trigger('change');
+                };
+
+                that.internalOnInvalidateSelection = function() {
+                    originalEl.children('option:selected').prop('selected', false);
+                    originalEl.trigger('change');
+                }
             }
 
             // Remove autocomplete attribute to prevent native suggestions:
@@ -417,8 +433,13 @@
             else {
                 if (that.selection) {
                     that.selection = null;
+
                     if ($.isFunction(that.options.onInvalidateSelection)) {
                         that.options.onInvalidateSelection.call(that.element);
+                    }
+
+                    if ($.isFunction(that.internalOnInvalidateSelection)) {
+                        that.internalOnInvalidateSelection.call(that.element);
                     }
                 }
 
@@ -723,6 +744,10 @@
 
             if ($.isFunction(onSelectCallback)) {
                 onSelectCallback.call(that.element, suggestion);
+            }
+
+            if ($.isFunction(that.internalOnSelect)) {
+                that.internalOnSelect.call(that.element, suggestion);
             }
         },
 
