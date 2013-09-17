@@ -93,6 +93,8 @@
         // Shared variables:
         that.element = el;
         that.el = $(el);
+        that.originalElement = that.element; // used to store the element autocomplete() was originally called upon
+        that.originalEl = that.el;           // (before an HTML-select got 'replaced' by an HTML-input in initialize() below)
         that.suggestions = [];
         that.suggestionsValues = [];
         that.badQueries = [];
@@ -147,27 +149,26 @@
                     var option = $(option);
                     var label = option.prop('label') || option.val(); // TODO: check various combinations of this
                     var value = option.prop('value') || option.val();
-                    if (label||value) options.lookup.push({ 'value': label||value, 'data': value }); // TODO: check what happens if there is no empty option
+                    if (label||value) options.lookup.push({ 'value': label||value, 'data': value });
                 });
                 var inputEl = $('<input type="text" id="'+that.el.attr('id')+'-autocomplete" class="'+that.el.attr('class')+'" style="'+that.el.attr('style')+'"/>');
                 // TODO: check if copying style is actually working, copy more attributes, listen to 'change' event of original el and change input accordingly
                 that.el.hide();
                 that.el.before(inputEl);
-                var originalEl = that.el;
                 that.el = inputEl;
                 that.element = inputEl[0];
-                that.currentValue = ''; // this has been initialized with 'element.value' above; TODO: adhere to option[selected] (pre-select BUT show full list on focus) (hint: autoSelectFirst + clear())
+                that.currentValue = ''; // this has been initialized with 'element.value' above // TODO: adhere to option[selected] (pre-select BUT show full list on focus) (hint: autoSelectFirst + clear())
 
                 that.internalOnSelect = function(suggestion) { // TODO: implemenet publish/subscribe pattern instead of this approach
-                    var originalOption = originalEl.children('option[value="'+(suggestion.data||suggestion.value)+'"]')
-                                         || originalEl.children('option:contains("'+(suggestion.data||suggestion.value)+'")');
+                    var originalOption = that.originalEl.children('option[value="'+(suggestion.data||suggestion.value)+'"]')
+                                         || that.originalEl.children('option:contains("'+(suggestion.data||suggestion.value)+'")');
                     originalOption.prop('selected', true); // TODO: select multi (?)
-                    originalEl.trigger('change'); // for convenience, does not fire native browser event // TODO: make this optional (?)
+                    that.originalEl.trigger('change'); // for convenience, but does not fire native browser event // TODO: make this optional (?)
                 };
 
-                that.internalOnInvalidateSelection = function() {
-                    originalEl.children('option:selected').prop('selected', false);
-                    originalEl.trigger('change'); // for convenience, does not fire native browser event // TODO: make this optional (?)
+                that.internalOnInvalidateSelection = function() { // TODO: implemenet publish/subscribe pattern instead of this approach
+                    that.originalEl.children('option:selected').prop('selected', false);
+                    that.originalEl.trigger('change'); // for convenience, but does not fire native browser event // TODO: make this optional (?)
                 }
             }
 
@@ -440,7 +441,7 @@
                     }
 
                     if ($.isFunction(that.options.onInvalidateSelection)) {
-                        that.options.onInvalidateSelection.call(that.element);
+                        that.options.onInvalidateSelection.call(that.element, that.originalElement);
                     }
                 }
 
@@ -748,7 +749,7 @@
             }
 
             if ($.isFunction(onSelectCallback)) {
-                onSelectCallback.call(that.element, suggestion);
+                onSelectCallback.call(that.element, suggestion, that.originalElement);
             }
         },
 
