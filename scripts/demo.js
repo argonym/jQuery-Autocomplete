@@ -10,9 +10,6 @@ $(function () {
         dataType: 'json'
     }).done(function (source) {
 
-        var countriesArray = $.map(source, function (value, key) { return { value: value, data: key }; }),
-            countries = $.map(source, function (value) { return value; });
-
         // Setup jQuery ajax mock:
         $.mockjax({
             url: '*',
@@ -51,37 +48,37 @@ $(function () {
                 $('#selction-ajax').html('You selected: none');
             }
         });
-
-        // Initialize autocomplete with local lookup:
-        $('#select-autocomplete').autocomplete({
-            /* lookup: countriesArray, */
-            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
-                var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'i');
-                return re.test(suggestion.value) || re.test(suggestion.data);
-            },
-            triggerSelectOnValidInput: true,
-            minChars: 0,
-            showSuggestionsOnFocus: true,
-            onSelect: function (suggestion) {
-                $('#select-selection').html('You selected: ' + suggestion.value + ', ' + suggestion.data);
-            },
-            onInvalidateSelection: function() {
-                $('#select-selection').html('You selected: none');
-            }
-        });
-        $('#select-autocomplete').live('change', function(e) { alert(e); })
-        
-        // Initialize autocomplete with custom appendTo:
-        $('#autocomplete-custom-append').autocomplete({
-            lookup: countriesArray,
-            appendTo: '#suggestions-container'
-        });
-
-        // Initialize autocomplete with custom appendTo:
-        $('#autocomplete-dynamic').autocomplete({
-            lookup: countriesArray
-        });
-        
     });
 
+    var countriesArray = $.map(countries, function (value, key) { return { value: value, data: key }; });
+    
+    // Initialize autocomplete with local lookup:
+    $('#select-autocomplete').autocomplete({
+        /* lookup: countriesArray, */
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+            var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'i');
+            return re.test(suggestion.value) || re.test(suggestion.data);
+        },
+        triggerSelectOnValidInput: true,
+        minChars: 0,
+        showSuggestionsOnFocus: true,
+        onSelect: function (suggestion) {
+            $('#select-selection').html('You selected: ' + suggestion.value + ', ' + suggestion.data);
+        },
+        onInvalidateSelection: function() {
+            $('#select-selection').html('You selected: none');
+        }
+    });
+    $('#select-autocomplete').live('change', function(e) { alert(e); })
+
+    // Initialize autocomplete with custom appendTo:
+    $('#autocomplete-custom-append').autocomplete({
+        lookup: countriesArray,
+        appendTo: '#suggestions-container'
+    });
+
+    // Initialize autocomplete with custom appendTo:
+    $('#autocomplete-dynamic').autocomplete({
+        lookup: countriesArray
+    });
 });
