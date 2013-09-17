@@ -150,12 +150,13 @@
                     if (label||value) options.lookup.push({ 'value': label||value, 'data': value }); // TODO: check what happens if there is no empty option
                 });
                 var inputEl = $('<input type="text" id="'+that.el.attr('id')+'-autocomplete" class="'+that.el.attr('class')+'" style="'+that.el.attr('style')+'"/>');
-                // TODO: copy more attributes, adhere to option[selected]
+                // TODO: copy more attributes, listen to 'change' event of original el and change input accordingly
                 that.el.hide();
                 that.el.before(inputEl);
                 var originalEl = that.el;
                 that.el = inputEl;
                 that.element = inputEl[0];
+                that.currentValue = ''; // this has been initialized with 'element.value' above; TODO: adhere to option[selected] (pre-select BUT show full list on focus) (hint: autoSelectFirst + clear())
 
                 that.internalOnSelect = function(suggestion) {
                     var originalOption = originalEl.children('option[value="'+(suggestion.data||suggestion.value)+'"]')
