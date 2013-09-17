@@ -62,14 +62,14 @@ $(function () {
         triggerSelectOnValidInput: true,
         minChars: 0,
         showSuggestionsOnFocus: true,
-        onSelect: function (suggestion) {
-            $('#select-selection').html('You selected: ' + suggestion.value + ', ' + suggestion.data);
+        onSelect: function (suggestion, originalElement) {
+            // $(originalElement).val(suggestion.value); // jquery-autocomplete already takes care of this
         },
-        onInvalidateSelection: function() {
-            $('#select-selection').html('You selected: none');
-        }
+        onInvalidateSelection: function(originalElement) {}
     });
-    $('#select-autocomplete').live('change', function(e) { alert(e); })
+    $('#select-autocomplete').live('change', function(e) {
+        $('#select-selection').html('You selected: ' + $(this).val());
+    });
 
     // Initialize autocomplete with custom appendTo:
     $('#autocomplete-custom-append').autocomplete({

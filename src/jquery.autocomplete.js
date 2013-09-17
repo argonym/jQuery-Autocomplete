@@ -147,12 +147,12 @@
                 if (!$.isArray(options.lookup)) options.lookup = [];
                 that.el.children('option').each(function(i, option) {
                     var option = $(option);
-                    var label = option.prop('label') || option.val(); // TODO: check various combinations of this
+                    var label = option.prop('label') || $.trim(option.text()) || option.val();
                     var value = option.prop('value') || option.val();
                     if (label||value) options.lookup.push({ 'value': label||value, 'data': value });
                 });
-                var inputEl = $('<input type="text" id="'+that.el.attr('id')+'-autocomplete" class="'+that.el.attr('class')+'" style="'+that.el.attr('style')+'"/>');
-                // TODO: check if copying style is actually working, copy more attributes, listen to 'change' event of original el and change input accordingly
+                var inputEl = $('<input type="text" id="autocomplete-'+(that.el.attr('id')||(new Date).getTime())+'" class="'+(that.el.attr('class')||'')+'" style="'+(that.el.attr('style')||'')+'"/>');
+                // TODO: copy more attributes, listen to 'change' event of original el and change input accordingly
                 that.el.hide();
                 that.el.before(inputEl);
                 that.el = inputEl;
