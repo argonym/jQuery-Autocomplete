@@ -150,7 +150,7 @@
                     if (label||value) options.lookup.push({ 'value': label||value, 'data': value }); // TODO: check what happens if there is no empty option
                 });
                 var inputEl = $('<input type="text" id="'+that.el.attr('id')+'-autocomplete" class="'+that.el.attr('class')+'" style="'+that.el.attr('style')+'"/>');
-                // TODO: copy more attributes, listen to 'change' event of original el and change input accordingly
+                // TODO: check if copying style is actually working, copy more attributes, listen to 'change' event of original el and change input accordingly
                 that.el.hide();
                 that.el.before(inputEl);
                 var originalEl = that.el;
@@ -158,16 +158,16 @@
                 that.element = inputEl[0];
                 that.currentValue = ''; // this has been initialized with 'element.value' above; TODO: adhere to option[selected] (pre-select BUT show full list on focus) (hint: autoSelectFirst + clear())
 
-                that.internalOnSelect = function(suggestion) {
+                that.internalOnSelect = function(suggestion) { // TODO: implemenet publish/subscribe pattern instead of this approach
                     var originalOption = originalEl.children('option[value="'+(suggestion.data||suggestion.value)+'"]')
                                          || originalEl.children('option:contains("'+(suggestion.data||suggestion.value)+'")');
                     originalOption.prop('selected', true); // TODO: select multi (?)
-                    originalEl.trigger('change');
+                    originalEl.trigger('change'); // for convenience, does not fire native browser event // TODO: make this optional (?)
                 };
 
                 that.internalOnInvalidateSelection = function() {
                     originalEl.children('option:selected').prop('selected', false);
-                    originalEl.trigger('change');
+                    originalEl.trigger('change'); // for convenience, does not fire native browser event // TODO: make this optional (?)
                 }
             }
 
@@ -435,12 +435,12 @@
                 if (that.selection) {
                     that.selection = null;
 
-                    if ($.isFunction(that.options.onInvalidateSelection)) {
-                        that.options.onInvalidateSelection.call(that.element);
-                    }
-
                     if ($.isFunction(that.internalOnInvalidateSelection)) {
                         that.internalOnInvalidateSelection.call(that.element);
+                    }
+
+                    if ($.isFunction(that.options.onInvalidateSelection)) {
+                        that.options.onInvalidateSelection.call(that.element);
                     }
                 }
 
@@ -743,12 +743,12 @@
             that.suggestions = [];
             that.selection = suggestion;
 
-            if ($.isFunction(onSelectCallback)) {
-                onSelectCallback.call(that.element, suggestion);
-            }
-
             if ($.isFunction(that.internalOnSelect)) {
                 that.internalOnSelect.call(that.element, suggestion);
+            }
+
+            if ($.isFunction(onSelectCallback)) {
+                onSelectCallback.call(that.element, suggestion);
             }
         },
 
